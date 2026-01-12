@@ -1,0 +1,32 @@
+# CodeRabbit Configuration File
+# Documentation: https://coderabbit.ai/docs/configure-coderabbit
+
+version: "1.0"
+
+reviews:
+  # Enable high-level summary of changes
+  summary: true
+  
+  # Enable line-by-line code review
+  review_status: true
+  
+  # Enable AI chat in PR comments
+  conversation: true
+  
+  # Configuration for the AI's behavior
+  profile: "chill" # Options: "chill", "assertive"
+  
+  # Auto-review settings
+  auto_review:
+    enabled: true
+    drafts: false # Don't review draft PRs automatically
+  
+  # File patterns to ignore
+  ignore:
+    - "**/*.lock"
+    - "**/*.min.js"
+    - "**/*.svg"
+    - "public/**"
+
+chat:
+  auto_reply: true
