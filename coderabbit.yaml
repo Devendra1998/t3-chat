@@ -1,7 +1,7 @@
 # CodeRabbit Configuration File
 # Documentation: https://coderabbit.ai/docs/configure-coderabbit
 
-version: "1.0"
+version: "2.0"
 
 reviews:
   # Enable high-level summary of changes
