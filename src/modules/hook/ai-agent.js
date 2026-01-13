@@ -5,6 +5,13 @@ import {useQuery} from '@tanstack/react-query'
 export const useAIModels = () => {
     return useQuery({
         queryKey: ['ai-models'],
-        queryFn: () => fetch('/api/ai/get-models').then(res => res.json()),
+        queryFn: async () => {
+            const res = await fetch('/api/ai/get-models');
+            if (!res.ok) {
+                throw new Error(`Failed to fetch AI models: ${res.status}`);
+            }
+            return res.json();
+        },
     })
+}
 }
