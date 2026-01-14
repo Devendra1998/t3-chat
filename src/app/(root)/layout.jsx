@@ -12,14 +12,13 @@ const Layout = async ({ children }) => {
     headers: await headers(),
   });
 
-  const user = await currentUser();
-
-  const { data: chats } = await getAllChats();
-
-
   if (!session) {
     return redirect("/sign-in");
   }
+
+  const user = await currentUser();
+  const { data: chats } = await getAllChats();
+
   return (
     <div className="flex h-screen overflow-hidden">
       <ChatSidebar user={user} chats={chats} />
