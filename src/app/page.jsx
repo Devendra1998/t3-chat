@@ -1,10 +1,13 @@
-import { Button } from "@/components/ui/button";
+import { currentUser } from "@/modules/authentication/actions";
+import UserButton from "@/modules/authentication/components/user-button";
 
 
-export default function Home() {
+
+export default async function Home() {
+  const user = await currentUser();
   return (
     <div className="flex h-screen items-center justify-center">
-      <Button>T3 Chat</Button>
+      <UserButton user={user} />
     </div>
   );
 }
