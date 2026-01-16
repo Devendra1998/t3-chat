@@ -1,4 +1,3 @@
-import { ModeToggle } from '@/components/ui/mode-toggle'
 import { currentUser } from '@/modules/authentication/actions'
 import ChatMessageView from '@/modules/chat/components/chat-message-view'
 import React from 'react'

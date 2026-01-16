@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 import { cn } from "@/lib/utils";
-import { useAIModels } from "@/modules/ai-agent/hook/ai-agent";
+import { useAIModels } from "@/modules/ai-agents/hook/ai-agent";
 import { ModelSelector } from "./model-selector";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
