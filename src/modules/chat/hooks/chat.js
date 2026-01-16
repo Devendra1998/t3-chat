@@ -26,7 +26,7 @@ export const useCreateMessageInChat = (chatId) => {
     // Optimistic update: update both the zustand store and React Query cache
     onMutate: async (values) => {
       // Cancel any outgoing refetches for this chat so they don't overwrite our optimistic update
-      await queryClient.cancelQueries(["chats", chatId]);
+      await queryClient.cancelQueries({ queryKey: ["chats", chatId] });
 
     
       const previousChat = queryClient.getQueryData(["chats", chatId]);
