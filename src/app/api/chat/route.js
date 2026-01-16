@@ -50,13 +50,41 @@ function extractPartsAsJSON(message) {
 
 export async function POST(req) {
   try {
-    const { chatId, messages: newMessages, model, skipUserMessage } = await req.json();
- 
+    const {
+      chatId,
+      messages: newMessages,
+      content,
+      model,
+      skipUserMessage
+    } = await req.json();
+
+    if (!model || typeof model !== 'string') {
+      return new Response(JSON.stringify({ error: "Invalid or missing model" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    const incoming = Array.isArray(newMessages)
+      ? newMessages
+      : Array.isArray(content)
+        ? content
+        : (newMessages ?? content ?? []);
+
+    const filteredIncoming = incoming.filter(m => m != null);
+
+    if (filteredIncoming.length === 0 && !chatId) {
+      return new Response(JSON.stringify({ error: "No messages provided" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
     const previousMessages = chatId
       ? await db.message.findMany({
-          where: { chatId },
-          orderBy: { createdAt: "asc" },
-        })
+        where: { chatId },
+        orderBy: { createdAt: "asc" },
+      })
       : [];
 
 
@@ -64,26 +92,29 @@ export async function POST(req) {
       .map(convertStoredMessageToUI)
       .filter(msg => msg !== null); // Remove invalid messages
 
-    const normalizedNewMessages = Array.isArray(newMessages)
-      ? newMessages
-      : [newMessages];
+    const isDev = process.env.NODE_ENV !== 'production';
 
-    console.log("📊 Previous messages:", uiMessages.length);
-    console.log("📊 New messages:", normalizedNewMessages.length);
+    if (isDev) {
+      console.log("📊 Previous messages:", uiMessages.length);
+      console.log("📊 New messages:", filteredIncoming.length);
+    } else {
+      console.log(`📊 Messages summary: prev=${uiMessages.length}, new=${filteredIncoming.length}`);
+    }
 
     // ✅ FIXED: Combine messages properly
-    const allUIMessages = [...uiMessages, ...normalizedNewMessages];
+    const allUIMessages = [...uiMessages, ...filteredIncoming];
 
     // ✅ CRITICAL FIX: convertToModelMessages might fail with tool parts
     // We need to ensure only valid messages are converted
     let modelMessages;
     try {
       modelMessages = convertToModelMessages(allUIMessages);
-      console.log("✅ Converted to model messages:", modelMessages.length);
+      if (isDev) {
+        console.log("✅ Converted to model messages:", modelMessages.length);
+      }
     } catch (conversionError) {
-      console.error("❌ Message conversion error:", conversionError);
-      
-     
+      console.error("❌ Message conversion error:", conversionError.message || conversionError);
+
       modelMessages = allUIMessages.map(msg => ({
         role: msg.role,
         content: msg.parts
@@ -91,18 +122,23 @@ export async function POST(req) {
           .map(p => p.text)
           .join('\n')
       })).filter(m => m.content); // Remove empty messages
-      
-      console.log("⚠️ Using fallback conversion:", modelMessages.length);
+
+      if (isDev) {
+        console.log("⚠️ Using fallback conversion:", modelMessages.length);
+      }
     }
 
-    console.log("🤖 Final model messages:", JSON.stringify(modelMessages, null, 2));
+    if (isDev) {
+      console.log("🤖 Final model messages:", JSON.stringify(modelMessages, null, 2));
+    }
+
 
     // ✅ FIXED: Proper streamText configuration
     const result = streamText({
       model: provider.chat(model),
       messages: modelMessages,
       system: CHAT_SYSTEM_PROMPT,
-   
+
     });
 
     return result.toUIMessageStreamResponse({
@@ -112,7 +148,7 @@ export async function POST(req) {
         try {
           const messagesToSave = [];
           if (!skipUserMessage) {
-            const latestUserMessage = normalizedNewMessages[normalizedNewMessages.length - 1];
+            const latestUserMessage = filteredIncoming[filteredIncoming.length - 1];
 
             if (latestUserMessage?.role === "user") {
               const userPartsJSON = extractPartsAsJSON(latestUserMessage);
@@ -142,7 +178,7 @@ export async function POST(req) {
             await db.message.createMany({
               data: messagesToSave,
             });
-           
+
           }
         } catch (error) {
           console.error("❌ Error saving messages:", error);
@@ -152,13 +188,13 @@ export async function POST(req) {
   } catch (error) {
     console.error("❌ API Route Error:", error);
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: error.message || "Internal server error",
-        details: error.toString() 
+        details: error.toString()
       }),
-      { 
-        status: 500, 
-        headers: { "Content-Type": "application/json" } 
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" }
       }
     );
   }

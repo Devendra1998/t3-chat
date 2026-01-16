@@ -49,7 +49,7 @@ export const Context = ({
 const ContextIcon = () => {
   const { usedTokens, maxTokens } = useContextValue();
   const circumference = 2 * Math.PI * ICON_RADIUS;
-  const usedPercent = usedTokens / maxTokens;
+  const usedPercent = maxTokens ? Math.min(Math.max(usedTokens / maxTokens, 0), 1) : 0;
   const dashOffset = circumference * (1 - usedPercent);
 
   return (
@@ -89,7 +89,7 @@ export const ContextTrigger = ({
   ...props
 }) => {
   const { usedTokens, maxTokens } = useContextValue();
-  const usedPercent = usedTokens / maxTokens;
+  const usedPercent = maxTokens ? Math.min(Math.max(usedTokens / maxTokens, 0), 1) : 0;
   const renderedPercent = new Intl.NumberFormat("en-US", {
     style: "percent",
     maximumFractionDigits: 1,
@@ -124,7 +124,7 @@ export const ContextContentHeader = ({
   ...props
 }) => {
   const { usedTokens, maxTokens } = useContextValue();
-  const usedPercent = usedTokens / maxTokens;
+  const usedPercent = maxTokens ? Math.min(Math.max(usedTokens / maxTokens, 0), 1) : 0;
   const displayPct = new Intl.NumberFormat("en-US", {
     style: "percent",
     maximumFractionDigits: 1,
@@ -173,12 +173,12 @@ export const ContextContentFooter = ({
   const { modelId, usage } = useContextValue();
   const costUSD = modelId
     ? estimateCost({
-        modelId,
-        usage: {
-          input: usage?.inputTokens ?? 0,
-          output: usage?.outputTokens ?? 0,
-        },
-      }).totalUSD
+      modelId,
+      usage: {
+        input: usage?.inputTokens ?? 0,
+        output: usage?.outputTokens ?? 0,
+      },
+    }).totalUSD
     : undefined;
   const totalCost = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -220,9 +220,9 @@ export const ContextInputUsage = ({
 
   const inputCost = modelId
     ? estimateCost({
-        modelId,
-        usage: { input: inputTokens, output: 0 },
-      }).totalUSD
+      modelId,
+      usage: { input: inputTokens, output: 0 },
+    }).totalUSD
     : undefined;
   const inputCostText = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -257,9 +257,9 @@ export const ContextOutputUsage = ({
 
   const outputCost = modelId
     ? estimateCost({
-        modelId,
-        usage: { input: 0, output: outputTokens },
-      }).totalUSD
+      modelId,
+      usage: { input: 0, output: outputTokens },
+    }).totalUSD
     : undefined;
   const outputCostText = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -294,9 +294,9 @@ export const ContextReasoningUsage = ({
 
   const reasoningCost = modelId
     ? estimateCost({
-        modelId,
-        usage: { reasoningTokens },
-      }).totalUSD
+      modelId,
+      usage: { reasoningTokens },
+    }).totalUSD
     : undefined;
   const reasoningCostText = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -331,9 +331,9 @@ export const ContextCacheUsage = ({
 
   const cacheCost = modelId
     ? estimateCost({
-        modelId,
-        usage: { cacheReads: cacheTokens, input: 0, output: 0 },
-      }).totalUSD
+      modelId,
+      usage: { cacheReads: cacheTokens, input: 0, output: 0 },
+    }).totalUSD
     : undefined;
   const cacheCostText = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -358,8 +358,8 @@ const TokensWithCost = ({
     {tokens === undefined
       ? "—"
       : new Intl.NumberFormat("en-US", {
-          notation: "compact",
-        }).format(tokens)}
+        notation: "compact",
+      }).format(tokens)}
     {costText ? (
       <span className="ml-2 text-muted-foreground">• {costText}</span>
     ) : null}

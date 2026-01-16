@@ -10,6 +10,6 @@ export const Response = memo(({
   <Streamdown
     className={cn("size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0", className)}
     {...props} />
-), (prevProps, nextProps) => prevProps.children === nextProps.children);
+));
 
 Response.displayName = "Response";

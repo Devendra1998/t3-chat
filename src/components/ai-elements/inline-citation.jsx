@@ -34,23 +34,36 @@ export const InlineCitationCardTrigger = ({
   sources,
   className,
   ...props
-}) => (
-  <HoverCardTrigger asChild>
-    <Badge
-      className={cn("ml-1 rounded-full", className)}
-      variant="secondary"
-      {...props}>
-      {sources.length ? (
-        <>
-          {new URL(sources[0]).hostname}{" "}
-          {sources.length > 1 && `+${sources.length - 1}`}
-        </>
-      ) : (
-        "unknown"
-      )}
-    </Badge>
-  </HoverCardTrigger>
-);
+}) => {
+  const getHostname = (urlStr) => {
+    try {
+      if (!urlStr) return "unknown";
+      return new URL(urlStr).hostname;
+    } catch (e) {
+      return urlStr || "unknown";
+    }
+  };
+
+  const hasSources = Array.isArray(sources) && sources.length > 0;
+
+  return (
+    <HoverCardTrigger asChild>
+      <Badge
+        className={cn("ml-1 rounded-full", className)}
+        variant="secondary"
+        {...props}>
+        {hasSources ? (
+          <>
+            {getHostname(sources[0])}{" "}
+            {sources.length > 1 && `+${sources.length - 1}`}
+          </>
+        ) : (
+          "unknown"
+        )}
+      </Badge>
+    </HoverCardTrigger>
+  );
+};
 
 export const InlineCitationCardBody = ({
   className,
@@ -122,9 +135,15 @@ export const InlineCitationCarouselIndex = ({
     setCount(api.scrollSnapList().length);
     setCurrent(api.selectedScrollSnap() + 1);
 
-    api.on("select", () => {
+    const onSelect = () => {
       setCurrent(api.selectedScrollSnap() + 1);
-    });
+    };
+
+    api.on("select", onSelect);
+
+    return () => {
+      api.off("select", onSelect);
+    };
   }, [api]);
 
   return (

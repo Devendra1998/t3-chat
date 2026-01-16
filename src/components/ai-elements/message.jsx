@@ -9,6 +9,7 @@ import { cva } from "class-variance-authority";
 export const Message = ({
   className,
   from,
+  children,
   ...props
 }) => (
   <div
@@ -17,7 +18,9 @@ export const Message = ({
       from === "user" ? "is-user" : "is-assistant flex-row-reverse justify-end",
       className
     )}
-    {...props} />
+    {...props}>
+    {children}
+  </div>
 );
 
 const messageContentVariants = cva("is-user:dark flex flex-col gap-2 overflow-hidden rounded-lg text-sm", {

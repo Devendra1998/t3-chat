@@ -342,17 +342,30 @@ export const PromptInput = ({
 
     // Convert blob URLs to data URLs asynchronously
     Promise.all(items.map(async ({ id, ...item }) => {
-      if (item.url && item.url.startsWith("blob:")) {
-        return {
-          ...item,
-          url: await convertBlobUrlToDataUrl(item.url),
-        };
+      try {
+        if (item.url && item.url.startsWith("blob:")) {
+          return {
+            ...item,
+            url: await convertBlobUrlToDataUrl(item.url),
+          };
+        }
+      } catch (err) {
+        console.error(`Failed to convert attachment ${id}:`, err);
+        return { ...item, conversionError: true };
       }
       return item;
-    })).then((files) => {
-      onSubmit({ text, files }, event);
-      clear();
-    });
+    }))
+      .then((files) => {
+        onSubmit({ text, files }, event);
+        clear();
+      })
+      .catch((error) => {
+        console.error("Global submission conversion error:", error);
+        onError?.({
+          code: "conversion_error",
+          message: "Failed to process attachments for submission.",
+        });
+      });
   };
 
   const ctx = useMemo(() => ({
