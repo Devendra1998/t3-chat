@@ -18,8 +18,8 @@ import DeleteChatModal from "@/components/ui/delete-chat-modal";
 import { useState, useMemo } from "react";
 import Image from "next/image";
 
-export function ChatSidebar({user , chats}) {
-  const {activeChatId , setActiveChatId} = useChatStore();
+export function ChatSidebar({ user, chats }) {
+  const { activeChatId, setActiveChatId } = useChatStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedChatId, setSelectedChatId] = useState(null);
@@ -29,11 +29,11 @@ export function ChatSidebar({user , chats}) {
     if (!searchQuery.trim()) {
       return chats;
     }
-    
+
     const query = searchQuery.toLowerCase();
-    return chats.filter(chat => 
+    return chats.filter(chat =>
       chat.title?.toLowerCase().includes(query) ||
-      chat.messages?.some(msg => 
+      chat.messages?.some(msg =>
         msg.content?.toLowerCase().includes(query)
       )
     );
@@ -57,7 +57,7 @@ export function ChatSidebar({user , chats}) {
 
     filteredChats.forEach(chat => {
       const chatDate = new Date(chat.createdAt);
-      
+
       if (chatDate >= today) {
         groups.today.push(chat);
       } else if (chatDate >= yesterday) {
@@ -95,7 +95,7 @@ export function ChatSidebar({user , chats}) {
         key={chat.id}
         href={`/chat/${chat.id}`}
         className={cn(
-          "block rounded-lg px-3 py-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent transition-colors", 
+          "block rounded-lg px-3 py-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent transition-colors",
           chat.id === activeChatId && "bg-sidebar-accent"
         )}
       >
@@ -103,9 +103,9 @@ export function ChatSidebar({user , chats}) {
           <span className="truncate flex-1">{chat.title}</span>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="h-6 w-6 group-hover:opacity-100 hover:bg-sidebar-accent-foreground/10"
                 onClick={(e) => e.preventDefault()}
               >
@@ -115,8 +115,8 @@ export function ChatSidebar({user , chats}) {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                className="flex flex-row gap-2 cursor-pointer" 
+              <DropdownMenuItem
+                className="flex flex-row gap-2 cursor-pointer"
                 onClick={(e) => onDelete(e, chat.id)}
               >
                 <Trash className="h-4 w-4 text-red-500" />
@@ -128,18 +128,18 @@ export function ChatSidebar({user , chats}) {
       </Link>
     ));
   };
- 
+
   return (
     <div className="flex h-full w-64 flex-col border-r border-border bg-sidebar">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">
         <div className="flex items-center gap-2">
-        <Image
-        src={"/logo.svg"}
-        alt="Logo"
-        width={100}
-        height={100}
-        />
+          <Image
+            src={"/logo.svg"}
+            alt="Logo"
+            width={100}
+            height={100}
+          />
         </div>
       </div>
 
@@ -157,9 +157,9 @@ export function ChatSidebar({user , chats}) {
       <div className="px-4 pb-4">
         <div className="relative">
           <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input 
-            placeholder="Search your threads..." 
-            className="pl-9 bg-sidebar-accent border-sidebar-border pr-8" 
+          <Input
+            placeholder="Search your threads..."
+            className="pl-9 bg-sidebar-accent border-sidebar-border pr-8"
             value={searchQuery}
             onChange={handleSearchChange}
           />
@@ -193,21 +193,21 @@ export function ChatSidebar({user , chats}) {
                 {renderChatList(groupedChats.today)}
               </div>
             )}
-            
+
             {groupedChats.yesterday.length > 0 && (
               <div className="mb-4">
                 <div className="mb-2 px-2 text-xs font-semibold text-muted-foreground">Yesterday</div>
                 {renderChatList(groupedChats.yesterday)}
               </div>
             )}
-            
+
             {groupedChats.lastWeek.length > 0 && (
               <div className="mb-4">
                 <div className="mb-2 px-2 text-xs font-semibold text-muted-foreground">Last 7 Days</div>
                 {renderChatList(groupedChats.lastWeek)}
               </div>
             )}
-            
+
             {groupedChats.older.length > 0 && (
               <div className="mb-4">
                 <div className="mb-2 px-2 text-xs font-semibold text-muted-foreground">Older</div>
@@ -227,7 +227,7 @@ export function ChatSidebar({user , chats}) {
       <DeleteChatModal
         chatId={selectedChatId}
         isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen} 
+        setIsModalOpen={setIsModalOpen}
       />
     </div>
   );
