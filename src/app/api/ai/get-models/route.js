@@ -2,6 +2,15 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { NextResponse } from 'next/server';
 
+/**
+ * Handle GET requests to retrieve free models from OpenRouter and return them in a formatted JSON response.
+ * 
+ * Queries the OpenRouter models endpoint, filters models whose prompt and completion pricing are effectively zero,
+ * and returns a list of formatted model objects.
+ * 
+ * @param {Request} req - Incoming request object.
+ * @returns {NextResponse} On success, a JSON response with `{ models: Array<object> }`. If unauthorized, a JSON response `{ success: false, error: 'Unauthorized' }`. On failure, a JSON response `{ success: false, error: string }` describing the error.
+ */
 export async function GET(req) {
   try {
     const session = await auth.api.getSession({
