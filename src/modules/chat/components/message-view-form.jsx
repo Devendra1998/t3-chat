@@ -27,7 +27,7 @@ import {
 import { Response } from "@/components/ai-elements/response";
 import { Spinner } from "@/components/ui/spinner";
 import { ModelSelector } from "./model-selector";
-import { useAIModels } from "@/modules/ai-agent/hook/ai-agent";
+import { useAIModels } from "@/modules/ai-agents/hook/ai-agent";
 import { useChatStore } from "../store/chat-store";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
