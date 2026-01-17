@@ -82,7 +82,7 @@ export default function MessageViewWithForm({ chatId }) {
       });
   }, [data]);
 
-  const { stop, messages, status, sendMessage, regenerate } =
+  const { stop, messages, status, sendMessage, regenerate, setMessages } =
     useChat({
       initialMessages: [],
       api: "/api/chat",
@@ -131,6 +131,12 @@ export default function MessageViewWithForm({ chatId }) {
     router,
   ]);
 
+  useEffect(() => {
+    if (initialMessages.length > 0) {
+      setMessages(initialMessages);
+    }
+  }, [initialMessages, setMessages]);
+
   const handleSubmit = () => {
     if (!input.trim()) return;
 
@@ -145,15 +151,15 @@ export default function MessageViewWithForm({ chatId }) {
       }
     );
     setInput("");
-    console.log("📤 Sending to AI:", {
-      chatId,
-      selectedModel,
-      input
-    });
   };
 
   const handleRetry = () => {
-    regenerate();
+    regenerate({
+      body: {
+        model: selectedModel,
+        chatId,
+      },
+    });
   };
 
   const handleStop = () => {

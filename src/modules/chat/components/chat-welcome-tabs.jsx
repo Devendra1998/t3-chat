@@ -55,7 +55,7 @@ function ChatWelcomeTabs({ userName = "John Doe", onMessageSelect }) {
   return (
     <div className="flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-3xl space-y-8">
-        <h1 className="text-4xl font-semibold">
+        <h1 className="text-3xl font-semibold">
           How can I help you, {userName.slice(0, userName.indexOf(" ")) || userName}?
         </h1>
 
