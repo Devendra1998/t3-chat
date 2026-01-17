@@ -47,7 +47,7 @@ export default function MessageViewWithForm({ chatId }) {
 
   const [selectedModel, setSelectedModel] = useState(data?.data?.model);
   const [input, setInput] = useState("");
- 
+
   const hasAutoTriggered = useRef(false);
 
   const searchParams = useSearchParams();
@@ -82,11 +82,11 @@ export default function MessageViewWithForm({ chatId }) {
       });
   }, [data]);
 
- const { stop, messages, status, sendMessage, regenerate } =
-  useChat({
-    initialMessages: [],
-    api: "/api/chat",
-  });
+  const { stop, messages, status, sendMessage, regenerate } =
+    useChat({
+      initialMessages: [],
+      api: "/api/chat",
+    });
 
 
   useEffect(() => {
@@ -140,11 +140,16 @@ export default function MessageViewWithForm({ chatId }) {
         body: {
           model: selectedModel,
           chatId,
-        
+
         },
       }
     );
     setInput("");
+    console.log("📤 Sending to AI:", {
+      chatId,
+      selectedModel,
+      input
+    });
   };
 
   const handleRetry = () => {
@@ -165,7 +170,11 @@ export default function MessageViewWithForm({ chatId }) {
     );
   }
 
-  const messageToRender = [...initialMessages, ...messages];
+  // Deduplicate messages: filter out messages from useChat that already exist in initialMessages
+  const messageToRender = [
+    ...initialMessages,
+    ...messages.filter((m) => !initialMessages.some((msg) => msg.id === m.id)),
+  ];
 
 
 
@@ -206,9 +215,9 @@ export default function MessageViewWithForm({ chatId }) {
                             </ReasoningContent>
                           </Reasoning>
                         );
-                   
-              
-                     
+
+
+
                       case "step-start":
                         return i > 0 ? (
                           <div
@@ -255,7 +264,7 @@ export default function MessageViewWithForm({ chatId }) {
                   onModelSelect={setSelectedModel}
                 />
               )}
-             
+
               {status === "streaming" ? (
                 <PromptInputButton onClick={handleStop}>
                   <StopCircleIcon size={16} />
