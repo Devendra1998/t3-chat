@@ -84,7 +84,7 @@ export default function MessageViewWithForm({ chatId }) {
 
   const { stop, messages, status, sendMessage, regenerate } =
     useChat({
-      initialMessages: [],
+      initialMessages: initialMessages,
       api: "/api/chat",
     });
 
@@ -145,15 +145,24 @@ export default function MessageViewWithForm({ chatId }) {
       }
     );
     setInput("");
-    console.log("📤 Sending to AI:", {
-      chatId,
-      selectedModel,
-      input
-    });
   };
 
   const handleRetry = () => {
-    regenerate();
+    let textInput = initialMessages.filter((msg) => {
+      if (msg.role === "user") {
+        return msg?.parts[0]?.text;
+      }
+    });
+    sendMessage(
+      { text: textInput[textInput.length - 1]?.parts[0]?.text },
+      {
+        body: {
+          model: selectedModel,
+          chatId,
+
+        },
+      }
+    );
   };
 
   const handleStop = () => {
