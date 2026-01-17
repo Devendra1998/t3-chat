@@ -82,9 +82,9 @@ export default function MessageViewWithForm({ chatId }) {
       });
   }, [data]);
 
-  const { stop, messages, status, sendMessage, regenerate } =
+  const { stop, messages, status, sendMessage, regenerate, setMessages } =
     useChat({
-      initialMessages: initialMessages,
+      initialMessages: [],
       api: "/api/chat",
     });
 
@@ -131,6 +131,12 @@ export default function MessageViewWithForm({ chatId }) {
     router,
   ]);
 
+  useEffect(() => {
+    if (initialMessages.length > 0) {
+      setMessages(initialMessages);
+    }
+  }, [initialMessages, setMessages]);
+
   const handleSubmit = () => {
     if (!input.trim()) return;
 
@@ -148,21 +154,12 @@ export default function MessageViewWithForm({ chatId }) {
   };
 
   const handleRetry = () => {
-    let textInput = initialMessages.filter((msg) => {
-      if (msg.role === "user") {
-        return msg?.parts[0]?.text;
-      }
+    regenerate({
+      body: {
+        model: selectedModel,
+        chatId,
+      },
     });
-    sendMessage(
-      { text: textInput[textInput.length - 1]?.parts[0]?.text },
-      {
-        body: {
-          model: selectedModel,
-          chatId,
-
-        },
-      }
-    );
   };
 
   const handleStop = () => {
