@@ -1,7 +1,7 @@
 import { convertToModelMessages, streamText } from "ai";
 import { CHAT_SYSTEM_PROMPT } from "@/lib/prompt";
 import db from "@/lib/db";
-import { MessageRole } from "@prisma/client";
+import { MessageRole } from "@/generated/prisma";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 
 
@@ -101,14 +101,27 @@ export async function POST(req) {
       console.log(`📊 Messages summary: prev=${uiMessages.length}, new=${filteredIncoming.length}`);
     }
 
-    // ✅ FIXED: Combine messages properly
-    const allUIMessages = [...uiMessages, ...filteredIncoming];
+    // ✅ FIXED: Combine messages and ensure roles alternate
+    const combinedUIMessages = [...uiMessages];
+    for (const msg of filteredIncoming) {
+      const lastMsg = combinedUIMessages[combinedUIMessages.length - 1];
+      if (lastMsg && lastMsg.role === msg.role) {
+        // Merge identical consecutive roles into one
+        const lastParts = lastMsg.parts || [{ type: 'text', text: lastMsg.content || '' }];
+        const newParts = msg.parts || [{ type: 'text', text: msg.content || '' }];
+        lastMsg.parts = [...lastParts, ...newParts];
+      } else {
+        combinedUIMessages.push(msg);
+      }
+    }
+
+    const allUIMessages = combinedUIMessages;
 
     // ✅ CRITICAL FIX: convertToModelMessages might fail with tool parts
     // We need to ensure only valid messages are converted
     let modelMessages;
     try {
-      modelMessages = convertToModelMessages(allUIMessages);
+      modelMessages = await convertToModelMessages(allUIMessages);
       if (isDev) {
         console.log("✅ Converted to model messages:", modelMessages.length);
       }
@@ -143,7 +156,8 @@ export async function POST(req) {
 
     return result.toUIMessageStreamResponse({
       sendReasoning: true,
-      originalMessages: allUIMessages,
+      // Only include the PREVIOUS messages here, as the stream wrapper adds the new/assistant ones
+      originalMessages: uiMessages,
       onFinish: async ({ responseMessage }) => {
         try {
           const messagesToSave = [];
@@ -157,7 +171,7 @@ export async function POST(req) {
                 content: userPartsJSON,
                 messageRole: MessageRole.USER,
                 model,
-                messageType: "NORMAL",
+                messageType: MessageType.NORMAL,
               });
             }
           }
@@ -170,7 +184,7 @@ export async function POST(req) {
               content: assistantPartsJSON,
               messageRole: MessageRole.ASSISTANT,
               model,
-              messageType: "NORMAL",
+              messageType: MessageType.NORMAL,
             });
           }
 

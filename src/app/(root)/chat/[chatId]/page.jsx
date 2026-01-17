@@ -1,6 +1,6 @@
 import React from 'react'
 import ActiveChatLoader from '@/modules/chat/components/active-chat-loader'
-import MessageViewWithForm from '@/modules/chat/components/message-view-form';
+import Messageviewform from '@/modules/chat/components/message-view-form';
 
 
 
@@ -11,7 +11,7 @@ const Page = async ({ params }) => {
     <>
       <ActiveChatLoader chatId={chatId} />
     
-      <MessageViewWithForm chatId={chatId} />
+      <Messageviewform chatId={chatId} />
     </>
   );
 };
